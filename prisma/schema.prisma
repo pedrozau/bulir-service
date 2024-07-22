@@ -1,0 +1,68 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//   USER 
+model User {
+   id String  @id @default(uuid()) 
+   fullname String  // nome completo 
+   nif String @unique  // NIF
+   email String @unique  // E-mail 
+   password String  // senha 
+   role  Role @default(cliente) // Cliente ou Prestador
+   balance Float? @default(0)  // saldo 
+   creatAt DateTime @default(now())
+   service Service[]
+   transactionsAsCleint Transaction[] @relation("ClientTransactions")
+   transactionAsProvider Transaction[] @relation("ProviderTransactions")
+
+   @@map("users")
+}
+
+// ROLE
+enum Role {
+   cliente
+   prestador
+ 
+}
+
+
+// Service 
+model Service {
+  id String  @id @default(uuid())
+  title String  // titulo 
+  description String  // descrição 
+  price Float @default(0) // preço 
+  providerId String  // id do prestador
+  provider User @relation(fields: [providerId],references: [id]) 
+  createAt DateTime @default(now())
+  transactions Transaction[]
+
+  @@map("services")
+
+}
+
+
+// Transaction 
+model Transaction {
+
+   id String @id @default(uuid()) 
+   clientId String 
+   cliente User  @relation("ClientTransactions",fields: [clientId],references: [id])  //  cliente 
+   serviceId String 
+   providerId String 
+   provider  User @relation("ProviderTransactions",fields: [providerId],references: [id]) // prestador 
+   service Service @relation(fields: [serviceId],references: [id])  // serviço 
+   amount Float  // valor 
+   data DateTime @default(now()) // data
+
+   @@map("transactions")
+
+}
