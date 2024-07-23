@@ -60,7 +60,18 @@ export class UserService {
 
 // Busca de todos os usuarios
 async getAllUsers() {
-   return await this.prisma.user.findMany()
+   return await this.prisma.user.findMany({
+       select: {
+         id:true,
+         fullname: true,
+         email:true,
+         nif: true,
+         role: true,
+         creatAt: true, 
+         balance: true
+      
+       }
+   })
 }
 
  
@@ -78,7 +89,15 @@ async getUserByEmail(email: string) {
        throw new HttpException("Error na aplicação por favor contacta a equipe de desenvolvimento.",HttpStatus.BAD_REQUEST)
     }
 
-   return await this.prisma.user.findFirst({where: {email: email}})
+   return await this.prisma.user.findFirst({where: {email: email}, select: {
+      id:true,
+         fullname: true,
+         email:true,
+         nif: true,
+         role: true,
+         creatAt: true, 
+         balance: true
+   }})
 }
 
 
@@ -94,7 +113,16 @@ async getUserById(id: string) {
          throw new HttpException('Id informado não encontrado', HttpStatus.BAD_REQUEST)
       }
 
-      return await this.prisma.user.findFirst({where: {id: id}})
+      return await this.prisma.user.findFirst({where: {id},select: {
+         id:true,
+         fullname: true,
+         email:true,
+         nif: true,
+         role: true,
+         creatAt: true, 
+         balance: true
+
+      } })
 
     }catch(error) {
        throw new HttpException("Error na aplicação por favor contacta a equipe de desenvolvimento.",HttpStatus.BAD_REQUEST)
