@@ -1,7 +1,10 @@
 import { Body, Controller, Post, Get, Param, Delete, Put } from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { ServiceDTO } from './DTO/service.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+
+@ApiTags('Service')
 @Controller('api/service')
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
@@ -14,14 +17,14 @@ export class ServiceController {
     
   }
 
-   @Get()
+   @Get('getAll')
    async  getAllServices() {
      return await this.serviceService.getAllServices()
    }
 
    
 
-   @Get(':id')
+   @Get('getById/:id')
    async getServiceById(@Param('id') id: string) {
      return await this.serviceService.getServiceById(id)
    }
@@ -32,13 +35,13 @@ export class ServiceController {
    }
 
 
-   @Delete(':id')
+   @Delete('delete/:id')
    async deleteService(@Param('id') id: string) {
      return await this.serviceService.deleteService(id)
    }
 
    
-   @Put(':id')
+   @Put('update/:id')
    async updateService(@Body() data:ServiceDTO, @Param('id') id:string) {
      return await this.serviceService.updateService(data, id)
    }
