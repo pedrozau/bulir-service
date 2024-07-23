@@ -33,10 +33,48 @@ export class UserService {
          }
        })
 
+       return user
+
 
  }catch(error) {
    console.log(error)
  }
 
 }
+
+ 
+
+async getUserByEmail(email: string) {
+   return await this.prisma.user.findFirst({where: {email: email}})
+}
+
+
+async getUserById(id: string) {
+   return await this.prisma.user.findFirst({where: {id: id}})
+}
+
+
+
+async deleteUser(id: string) {
+   await this.prisma.user.delete({where: {id: id}})
+}
+
+
+
+async updateBalance(balance: number, userId: string) {
+      
+       const user = await this.prisma.user.findFirst({where:{id: userId}})
+
+       if(!user) {
+          throw new Error('User not found')
+       }
+
+      return await this.prisma.user.update({where:{id: userId}, data:{balance}})
+
+
+}
+
+
+
+
 }
