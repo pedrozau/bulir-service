@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Get, Param, Delete, Put } from '@nestjs/common';
 import { ServiceService } from './service.service';
-import { ServiceDTO } from './DTO/service.dto';
+import { ServiceDTO, ServiceHire } from './DTO/service.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 
@@ -19,7 +19,7 @@ export class ServiceController {
 
    @Get('getAll')
    async  getAllServices() {
-     return await this.serviceService.getAllServices()
+     return await this.serviceService.getAllService()
    }
 
    
@@ -30,8 +30,8 @@ export class ServiceController {
    }
    
    @Post('hire')
-   async hireService(@Body() {serviceId, userId}:{serviceId:string, userId:string}) {
-     return await this.serviceService.hireService(serviceId, userId)
+   async hireService(@Body() data: ServiceHire) {
+     return await this.serviceService.servicehire(data)
    }
 
 

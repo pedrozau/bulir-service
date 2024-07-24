@@ -163,7 +163,9 @@ async updateBalance(balance: number, userId: string) {
            throw new HttpException('Id informado não encontrado', HttpStatus.BAD_REQUEST)
        }
 
-      return await this.prisma.user.update({where:{id: userId}, data:{balance}})
+       const current_balance = user.balance + balance
+
+      return await this.prisma.user.update({where:{id: userId}, data:{balance:current_balance}})
 
          }catch(error) {
             throw new HttpException("Error na aplicação por favor contacta a equipe de desenvolvimento.",HttpStatus.BAD_REQUEST)
