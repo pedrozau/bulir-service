@@ -1,8 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto } from './auth.dto';
-import * as bcrypt from 'bcrypt';
-import { access } from 'fs';
+import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -14,10 +13,14 @@ export class AuthService {
     ) {} 
 
 
+    async comparePasswords(password: string, hashedPassword: string): Promise<boolean> {
+        return await argon2.verify(hashedPassword, password);
+      }
+
 
      async signIn({email, password}:AuthDto){
         
-             try {
+        
 
                const checkemail =  await this.prisma.user.findFirst({
                   where:{
@@ -25,49 +28,49 @@ export class AuthService {
                     }
                })
 
-
+               
                if(!checkemail){
                    throw new HttpException('Email ou  Senha  incorreta', 400);
                }
                
-               const chackpassword =  await bcrypt.compare(password, checkemail.password)
+               const chackpassword = await this.comparePasswords(password, checkemail.password)
+               console.log(checkemail.password)
+               console.log(chackpassword)
 
-               if(!chackpassword){
+
+               if(chackpassword){
                    throw new HttpException('Email ou  Senha  incorreta', 400);
-               }
+               }else {
+                
 
-
-               const data_ = await this.prisma.user.findFirst({
-                 where:{
-                    email
-                  },
-                  select:{
-                    id:true,
-                    email:true,
-                    nif:true,
-                    role:true,
+                const data_ = await this.prisma.user.findFirst({
+                    where:{
+                       email
+                     },
+                     select:{
+                       id:true,
+                       email:true,
+                       nif:true,
+                       balance:true,
+                       role:true,
+                     }
+                  })
+   
+                  const payload = {
+                   id: checkemail.id,
+                   email:checkemail.email,
+                   role:checkemail.role,
                   }
-               })
+                 
+   
+                  return {
+   
+                      access_token: this.jwtService.sign(payload),
+                      user: data_
+                  }
 
-               const payload = {
-                id: checkemail.id,
-                email:checkemail.email,
-                role:checkemail.role,
+
                }
-              
-
-               return {
-
-                   access_token: this.jwtService.sign(payload),
-                   user: data_
-               }
-
-
-
-
-             }catch(error){
-                 throw new HttpException('Invalid credentials', 400);
-             }
 
         
     }

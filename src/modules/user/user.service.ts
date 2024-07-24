@@ -1,13 +1,19 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserDTO } from './DTO/user.dto';
-import * as crypto from 'bcrypt';
+import * as argon2 from 'argon2';
 
 
 @Injectable()
 export class UserService {
 
   constructor(private prisma: PrismaService) {}
+
+
+  async hashPassword(password: string): Promise<string> {
+   return await argon2.hash(password);
+ }
+
 
    
 // Cadastro de usuarios
@@ -31,7 +37,7 @@ export class UserService {
         throw new HttpException('A senha deve ter no mínimo 8 caracteres.', HttpStatus.BAD_REQUEST)
       }else {
 
-         hashedPassword = await crypto.hash(password, 10);
+         hashedPassword = await this.hashPassword(password)
 
       }
       
@@ -190,7 +196,16 @@ async updateUser(id: string, data: UserDTO) {
       throw new HttpException('Id informado não encontrado', HttpStatus.BAD_REQUEST)
     }
 
-    return await this.prisma.user.update({where: {id}, data})
+    const hashPasswd = await this.hashPassword(data.password)
+
+    return await this.prisma.user.update({where: {id}, data: {
+         fullname: data.fullname,
+      email: data.email,
+      nif: data.nif,
+      password: hashPasswd,
+      role: data.role,
+      balance: data.balance
+    }})
 
    }catch(error) {
       throw new HttpException("Error na aplicação por favor contacta a equipe de desenvolvimento.",HttpStatus.BAD_REQUEST)
