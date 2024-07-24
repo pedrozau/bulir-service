@@ -8,6 +8,7 @@ import { AuthGuard } from '../auth/auth.guard';
 
 @ApiTags('Service')
 @ApiBearerAuth()
+@ApiBearerAuth()
 @Controller('api/service')
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
