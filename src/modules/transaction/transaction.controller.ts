@@ -1,10 +1,10 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 
 @ApiTags('transaction')
-@ApiBearerAuth()
+@ApiSecurity('basic')
 @Controller('api/transaction')
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
