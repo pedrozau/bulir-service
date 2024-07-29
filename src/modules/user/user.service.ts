@@ -96,7 +96,7 @@ async getUserByEmail(email: string) {
     }
 
    return await this.prisma.user.findFirst({where: {email: email}, select: {
-      id:true,
+         id:true,
          fullname: true,
          email:true,
          nif: true,
@@ -158,7 +158,7 @@ async deleteUser(id: string) {
 }
 
 
-// atualizar salodo de usuarios
+// atualizar saldo de usuarios
 async updateBalance(balance: number, userId: string) {
 
          try {
