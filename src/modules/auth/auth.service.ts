@@ -33,14 +33,21 @@ export class AuthService {
                    throw new HttpException('Email ou  Senha  incorreta', 400);
                }
                
+               
+               if(password == "") {
+                throw new HttpException('Não informou a senha!', 400);
+               }
+
                const chackpassword = await this.comparePasswords(password, checkemail.password)
+
+               console.log(chackpassword)
              
 
-               if(chackpassword){
+               if(!chackpassword){
                    throw new HttpException('Email ou  Senha  incorreta', 400);
                }else {
                 
-
+                
                 const data_ = await this.prisma.user.findFirst({
                     where:{
                        email

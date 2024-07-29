@@ -21,7 +21,6 @@ export class UserService {
 
      let hashedPassword = "" 
      
-     try {
      
       const checkemail  = await this.prisma.user.findFirst({where: {email}})
        const checknif  = await this.prisma.user.findFirst({where: {nif}})
@@ -57,9 +56,7 @@ export class UserService {
        return user
 
 
- }catch(error) {
-   throw new HttpException("Error na aplicação por favor contacta a equipe de desenvolvimento.",HttpStatus.BAD_REQUEST)
- }
+
 
 }
 
