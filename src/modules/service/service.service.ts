@@ -135,7 +135,7 @@ export class ServiceService {
            
      try {
 
-      return await this.prisma.service.findFirst({
+      return await this.prisma.service.findMany({
          where: {
             title
          }
