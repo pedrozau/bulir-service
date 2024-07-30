@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Get, Param, Delete, Put, UseGuards } from '@nestjs/common';
 import { ServiceService } from './service.service';
-import { ServiceDTO, ServiceHire } from './DTO/service.dto';
+import { ServiceDTO, ServiceHire, ServiceSearch } from './DTO/service.dto';
 import { ApiBearerAuth, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 
@@ -26,6 +26,12 @@ export class ServiceController {
    async  getAllServices() {
      return await this.serviceService.getAllService()
    }
+
+    @Get('search/:title')
+    async getByTitle(@Param('title') title: ServiceSearch) {
+      return await this.serviceService.getServiceByTitle(title)
+      
+    }
 
    
 

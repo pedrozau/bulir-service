@@ -45,3 +45,10 @@ export class ServiceHire {
 
 
 }
+
+export class ServiceSearch {
+    @ApiProperty()
+    @Expose()
+    @IsNotEmpty()
+    title: string
+}

@@ -1,6 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ServiceDTO, ServiceHire } from './DTO/service.dto';
+import { ServiceDTO, ServiceHire, ServiceSearch} from './DTO/service.dto';
 
 @Injectable()
 export class ServiceService {
@@ -128,6 +128,28 @@ export class ServiceService {
 
 
      }
+
+ // buscar service pelo seu title
+
+ async getServiceByTitle({title}:ServiceSearch) {
+           
+     try {
+
+      return await this.prisma.service.findFirst({
+         where: {
+            title
+         }
+      })
+
+     }catch(error) {
+         
+        throw new HttpException("problema na aplicação",400)
+
+     }
+
+      
+   }
+
 
   
 
