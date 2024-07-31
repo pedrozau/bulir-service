@@ -40,10 +40,7 @@ export class AuthService {
 
                const chackpassword = await this.comparePasswords(password, checkemail.password)
                
-              
-               console.log(checkemail.email)
-               console.log(chackpassword)
-             
+         
 
                if(!chackpassword){
                    throw new HttpException('Email ou  Senha  incorreta', 400);
