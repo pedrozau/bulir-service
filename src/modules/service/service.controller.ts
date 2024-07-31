@@ -24,7 +24,7 @@ export class ServiceController {
    @Get('getAll')
    @UseGuards(AuthGuard)
    async  getAllServices() {
-     return await this.serviceService.getAllService()
+     return await this.serviceService.getAllServices()
    }
 
     @Get('search/:title')
@@ -44,7 +44,7 @@ export class ServiceController {
    @Post('hire')
    @UseGuards(AuthGuard)
    async hireService(@Body() data: ServiceHire) {
-     return await this.serviceService.servicehire(data)
+     return await this.serviceService.serviceHire(data)
    }
 
 
@@ -58,7 +58,7 @@ export class ServiceController {
    @Put('update/:id')
    @UseGuards(AuthGuard)
    async updateService(@Body() data:ServiceDTO, @Param('id') id:string) {
-     return await this.serviceService.updateService(data, id)
+     return await this.serviceService.updateService(id, data)
    }
 
    
