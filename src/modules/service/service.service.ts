@@ -37,10 +37,12 @@ export class ServiceService {
   async checkBalance(serviceId: string, userId: string) {
    const service = await this.getServiceById(serviceId);
    const user = await this.getUserById(userId);
-   if (user.balance < service.price) {
-     return false;
-   }
-   return true;
+   
+    return {
+      balance:user.balance,
+      price: service.price,
+      
+    };
 
   }
 
