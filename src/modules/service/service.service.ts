@@ -1,6 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ServiceDTO, ServiceHire, ServiceSearch } from './DTO/service.dto';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class ServiceService {
@@ -105,16 +106,44 @@ export class ServiceService {
   }
 
   // Delete a service
-  async deleteService(serviceId: string) {
-    const service = await this.getServiceById(serviceId);
-    try {
-      return await this.prisma.service.delete({
-        where: { id: service.id },
-      });
-    } catch (error) {
-      throw new HttpException('Error deleting service', 400);
-    }
-  }
+//   async deleteService(serviceId: string) {
+//     const service = await this.getServiceById(serviceId);
+//    //  try {
+//       return await this.prisma.service.delete({
+//         where: { id: service.id },
+//       });
+//    //  } catch (error) {
+//    //    throw new HttpException('Error deleting service', 400);
+//    //  }
+//   }
+
+
+
+async deleteService(serviceId: string) {
+   try {
+     const service = await this.getServiceById(serviceId);
+ 
+     // Delete related transactions first (or handle in another way)
+     await this.prisma.transaction.deleteMany({
+       where: { serviceId: serviceId },
+     });
+ 
+     // Now delete the service
+     return await this.prisma.service.delete({
+       where: { id: serviceId },
+     });
+   } catch (error) {
+     if (error instanceof PrismaClientKnownRequestError) {
+       // Handle the specific error
+       console.error('Error deleting service:', error.message);
+     } else {
+       // Handle other errors
+       console.error('Unexpected error:', error);
+     }
+     throw error; // or handle it accordingly
+   }
+ }
+
 
   // Calculate balance for client and provider
   async calcBalance({ clientId, serviceId }: ServiceHire) {

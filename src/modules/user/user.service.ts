@@ -183,6 +183,8 @@ async updateBalance(balance: number, userId: string) {
 // atualizar usuarios
 async updateUser(id: string, data: UserDTO) {
 
+   let passwd = ""
+
    try {
 
     const checkId = await this.prisma.user.findFirst({where: {id}})
@@ -193,13 +195,24 @@ async updateUser(id: string, data: UserDTO) {
       throw new HttpException('Id informado não encontrado', HttpStatus.BAD_REQUEST)
     }
 
-    const hashPasswd = await this.hashPassword(data.password)
+
+    if(data.password != "") {
+      
+       passwd = await this.hashPassword(data.password)
+
+    }else {
+     
+      passwd = checkId.password
+
+    }
+
+   
 
     return await this.prisma.user.update({where: {id}, data: {
          fullname: data.fullname,
       email: data.email,
       nif: data.nif,
-      password: hashPasswd,
+      password: passwd,
       role: data.role,
       balance: data.balance
     }})
