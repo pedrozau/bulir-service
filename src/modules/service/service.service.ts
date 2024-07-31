@@ -35,16 +35,13 @@ export class ServiceService {
 
   // Check user's balance
   async checkBalance(serviceId: string, userId: string) {
-    const service = await this.getServiceById(serviceId);
-    const user = await this.getUserById(userId);
+   const service = await this.getServiceById(serviceId);
+   const user = await this.getUserById(userId);
+   if (user.balance < service.price) {
+     return false;
+   }
+   return true;
 
-      console.log(service.price)
-      console.log(user.balance)
-
-    if (service.price < user.balance) {
-
-      throw new HttpException('Insufficient balance', 400);
-    }
   }
 
   // Check if user is a client
@@ -145,9 +142,9 @@ async deleteService(serviceId: string) {
     const service = await this.getServiceById(serviceId);
     const provider = await this.getUserById(service.providerId);
 
-     await this.checkBalance(serviceId, clientId)
+     
 
-    const updatedClientBalance = service.price - Math.abs(client.balance);
+    const updatedClientBalance = Math.abs(client.balance -  service.price)
     const updatedProviderBalance = provider.balance + service.price;
 
     await this.prisma.user.update({
@@ -171,7 +168,6 @@ async deleteService(serviceId: string) {
     const client = await this.getUserById(clientId);
     const service = await this.getServiceById(serviceId);
 
-    await this.checkBalance(service.id, client.id);
     const { clientBalance } = await this.calcBalance({ clientId, serviceId });
 
     return await this.prisma.transaction.create({

@@ -47,6 +47,14 @@ export class ServiceController {
      return await this.serviceService.serviceHire(data)
    }
 
+   @Get('checkBalance')
+   async checkBalance(@Body('userId') userId: string, @Body('serviceId') serviceId: string) {
+     return await this.serviceService.checkBalance(serviceId, userId)
+     
+   }
+
+
+
 
    @Delete('delete/:id')
    @UseGuards(AuthGuard)
