@@ -60,13 +60,9 @@ export class ServiceService {
       const service = await this.getServiceById(serviceId)
       const user = await this.getUserById(userId)
         
-      if(service.price > user.balance)  {
+      if(service.price >= user.balance)  {
          throw new HttpException("Saldo insuficiente para contratar um serviço.",400)
-      }else {
-        
-          return true
-
-      } 
+      }
       
         
         
