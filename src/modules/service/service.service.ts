@@ -1,286 +1,161 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ServiceDTO, ServiceHire, ServiceSearch} from './DTO/service.dto';
+import { ServiceDTO, ServiceHire, ServiceSearch } from './DTO/service.dto';
 
 @Injectable()
 export class ServiceService {
-   constructor(private prisma: PrismaService) {}
-    
+  constructor(private prisma: PrismaService) {}
 
-   // buscar usuario pelo id 
-
-   async getUserById(userid: string) {
-         try {
-
-            const checkId = await this.prisma.user.findFirst({
-                where:{ 
-                   id: userid 
-                }
-            })
-
-          if(!checkId) {
-            throw new HttpException("id informado não encontrado",404)
-          }
-
-          return checkId
-
-
-         }catch(error) {
-            throw new HttpException("problema na aplicação",400)
-         }
-   }
-
-
-   // buscar serviço pelo id 
-
-
-   async getServiceById(id: string) {
-         try {
-
-            const service = await this.prisma.service.findFirst({
-                where: { id }
-            })
-
-            if(!service) {
-               throw new HttpException("id informado não encontrado",404)
-            }
-
-            return service
-
-         }catch(error) {
-            throw new HttpException("problema na aplicação ",400)
-         }
-   }
-  
-
-   /** Verificar o saldo do cliente para comprar o serviço */
-
-     async checkBalance(serviceId: string, userId: string) {
-          
-      const service = await this.getServiceById(serviceId)
-      const user = await this.getUserById(userId)
-        
-      if(service.price > user.balance)  {
-
-          return true
-         
-      }else {
-         throw new HttpException("Saldo insuficiente para contratar um serviço.",400)
+  // Get user by ID
+  async getUserById(userId: string) {
+    try {
+      const user = await this.prisma.user.findFirst({ where: { id: userId } });
+      if (!user) {
+        throw new HttpException('User not found', 404);
       }
-      
-        
-        
- 
+      return user;
+    } catch (error) {
+      throw new HttpException('Application error', 500);
+    }
+  }
 
-
-     }
-  
-   /** Verificar se o usuário é cliente */
-
-   async checkUser(userId: string) {
-      const  user = await this.prisma.user.findFirst({
-         where: {
-           id: userId 
-         }
-      })
-
-      if(!user)  throw new HttpException("usuario não encontrado.",404)
-
-       return user.role == 'cliente'
-      
- 
-   }
-  
-   /** Verificar se o usuário é prestador */
-
-   async checkProvider(providerId: string) {
-      const  provider = await this.prisma.user.findFirst({
-         where: {
-           id: providerId
-         }
-      })
-
-      if(!provider)  throw new HttpException("prestador não encontrado.",404)
-
-       return provider.role == 'prestador'
-      
- 
-   }
-   
-
-   /** Criar um serviço */
-
-     async createService(data:ServiceDTO) {
-         
-        try {
-
-         if(this.checkProvider) {
-            return await this.prisma.service.create({
-              data
-            })
-
-         }else {
-
-            throw new HttpException("Um cliente não poder criar um serviço.",400)
-         }
-
-
-        }catch(error) { 
-         throw new HttpException("Error ao salvar serviço.",400)
-
-        }
-
-
-     }
-
- // buscar service pelo seu title
-
- async getServiceByTitle({title}:ServiceSearch) {
-           
-     try {
-
-      return await this.prisma.service.findMany({
-         where: {
-            title
-         }
-      })
-
-     }catch(error) {
-         
-        throw new HttpException("problema na aplicação",400)
-
-     }
-
-      
-   }
-
-
-  
-
-   /** Pegar todos os serviços */
-
-   async getAllService() {
-
-       return await this.prisma.service.findMany() 
-   }
-   
-
-   /** Pegar um serviço por id */
-
-     async getById(id: string) {
-       return await this.getServiceById(id)
-     }
-   
-
-   /** Atualizar um serviço */
-
-   async updateService(data:ServiceDTO, serviceId: string) {
-      
-           
-         const checkservice = await this.getServiceById(serviceId)
-
-         
-         return await this.prisma.service.update({
-          data,
-          where: {
-             id: checkservice.id 
-          }
-         })
- 
-       
-   }
-   
-   /** Deletar serviço */
-
-   async deleteService(id: string) {
-
-     const service = await  this.getServiceById(id) 
-
-     return await this.prisma.user.delete({
-         where: {
-             id: service.id
-         }
-     })
-   
-   }
-
-
-   // calcular restante  o saldo para o cleinte e prestador 
-
-
-   async calc_balance({clientId, serviceId}:ServiceHire) {
-      
-      const user = await this.getUserById(clientId) 
-      const service = await this.getServiceById(serviceId) 
-
-      const provider = await this.getUserById(service.providerId)
-
-      const current_balance_client = user.balance - service.price 
-      const current_balance_provider = provider.balance + service.price
-
-      const balance_cleint = await this.prisma.user.update({
-           data: {
-            balance: current_balance_client
-           },
-           where: {
-              id: user.id
-           }
-      })
-
-      const balance_provider = await this.prisma.user.update({
-          data: {
-             balance: current_balance_provider
-          },
-          where: {
-            id: service.providerId
-          }
-      })
-
-
-      return {
-          balance_cleint,
-          balance_provider
+  // Get service by ID
+  async getServiceById(serviceId: string) {
+    try {
+      const service = await this.prisma.service.findFirst({ where: { id: serviceId } });
+      if (!service) {
+        throw new HttpException('Service not found', 404);
       }
+      return service;
+    } catch (error) {
+      throw new HttpException('Application error', 500);
+    }
+  }
 
+  // Check user's balance
+  async checkBalance(serviceId: string, userId: string) {
+    const service = await this.getServiceById(serviceId);
+    const user = await this.getUserById(userId);
 
-      
-      
-   }
+    if (service.price > user.balance) {
+      throw new HttpException('Insufficient balance', 400);
+    }
+  }
 
+  // Check if user is a client
+  async isClient(userId: string) {
+    const user = await this.prisma.user.findFirst({ where: { id: userId } });
+    if (!user) {
+      throw new HttpException('User not found', 404);
+    }
+    return user.role === 'cliente';
+  }
 
+  // Check if user is a provider
+  async isProvider(userId: string) {
+    const provider = await this.prisma.user.findFirst({ where: { id: userId } });
+    if (!provider) {
+      throw new HttpException('Provider not found', 404);
+    }
+    return provider.role === 'prestador';
+  }
 
+  // Create a service
+  async createService(data: ServiceDTO) {
+    try {
+      const isProvider = await this.isProvider(data.providerId);
+      if (!isProvider) {
+        throw new HttpException('Only providers can create services', 400);
+      }
+      return await this.prisma.service.create({ data });
+    } catch (error) {
+      throw new HttpException('Error creating service', 400);
+    }
+  }
 
+  // Get service by title
+  async getServiceByTitle({ title }: ServiceSearch) {
+    try {
+      return await this.prisma.service.findMany({ where: { title } });
+    } catch (error) {
+      throw new HttpException('Application error', 500);
+    }
+  }
 
-   /** Contratar serviços */
+  // Get all services
+  async getAllServices() {
+    try {
+      return await this.prisma.service.findMany();
+    } catch (error) {
+      throw new HttpException('Application error', 500);
+    }
+  }
 
-   async servicehire({clientId, serviceId}:ServiceHire) {
-       
-       const user = await this.getUserById(clientId) 
-       const service = await this.getServiceById(serviceId) 
-       
-       
-          await this.checkBalance(service.id, user.id)
-       
-          
-           const  data_user =  this.calc_balance({clientId, serviceId})
+  // Update a service
+  async updateService(serviceId: string, data: ServiceDTO) {
+    const existingService = await this.getServiceById(serviceId);
+    try {
+      return await this.prisma.service.update({
+        where: { id: existingService.id },
+        data,
+      });
+    } catch (error) {
+      throw new HttpException('Error updating service', 400);
+    }
+  }
 
-           return  await  this.prisma.transaction.create({
-                 data: {
-                    clientId: (await data_user).balance_cleint.id,
-                    providerId: service.providerId,
-                    serviceId: service.id,
-                    amount: service.price
+  // Delete a service
+  async deleteService(serviceId: string) {
+    const service = await this.getServiceById(serviceId);
+    try {
+      return await this.prisma.service.delete({
+        where: { id: service.id },
+      });
+    } catch (error) {
+      throw new HttpException('Error deleting service', 400);
+    }
+  }
 
-                 }
-           })
-         
+  // Calculate balance for client and provider
+  async calcBalance({ clientId, serviceId }: ServiceHire) {
+    const client = await this.getUserById(clientId);
+    const service = await this.getServiceById(serviceId);
+    const provider = await this.getUserById(service.providerId);
 
-       
+    const updatedClientBalance = client.balance - service.price;
+    const updatedProviderBalance = provider.balance + service.price;
 
+    await this.prisma.user.update({
+      where: { id: client.id },
+      data: { balance: updatedClientBalance },
+    });
 
+    await this.prisma.user.update({
+      where: { id: provider.id },
+      data: { balance: updatedProviderBalance },
+    });
 
+    return {
+      clientBalance: updatedClientBalance,
+      providerBalance: updatedProviderBalance,
+    };
+  }
 
-   }
+  // Hire a service
+  async serviceHire({ clientId, serviceId }: ServiceHire) {
+    const client = await this.getUserById(clientId);
+    const service = await this.getServiceById(serviceId);
 
-   
+    await this.checkBalance(service.id, client.id);
+    const { clientBalance } = await this.calcBalance({ clientId, serviceId });
+
+    return await this.prisma.transaction.create({
+      data: {
+        clientId: client.id,
+        providerId: service.providerId,
+        serviceId: service.id,
+        amount: service.price,
+      },
+    });
+  }
 }
