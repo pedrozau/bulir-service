@@ -41,13 +41,8 @@ export class ServiceService {
       console.log(service.price)
       console.log(user.balance)
 
-    if (service.price >=  Math.abs(user.balance)) {
+    if (service.price < user.balance) {
 
-      console.log('OK')
-
-       return true
-     
-    }else {
       throw new HttpException('Insufficient balance', 400);
     }
   }
