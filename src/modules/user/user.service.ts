@@ -195,7 +195,7 @@ async updateUser(id: string, data: UserDTO) {
       throw new HttpException('Id informado não encontrado', HttpStatus.BAD_REQUEST)
     }
 
-    console.log(checkId.password)
+
 
 
     if(!data.password) {
