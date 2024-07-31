@@ -185,7 +185,7 @@ async updateUser(id: string, data: UserDTO) {
 
    let passwd = ""
 
-   try {
+   // try {
 
     const checkId = await this.prisma.user.findFirst({where: {id}})
 
@@ -195,14 +195,16 @@ async updateUser(id: string, data: UserDTO) {
       throw new HttpException('Id informado não encontrado', HttpStatus.BAD_REQUEST)
     }
 
+    console.log(checkId.password)
 
-    if(data.password != "") {
+
+    if(!data.password) {
       
-       passwd = await this.hashPassword(data.password)
-
-    }else {
-     
-      passwd = checkId.password
+       passwd = checkId.password
+       
+   }else {
+      
+      passwd = await this.hashPassword(data.password)
 
     }
 
@@ -217,9 +219,9 @@ async updateUser(id: string, data: UserDTO) {
       balance: data.balance
     }})
 
-   }catch(error) {
-      throw new HttpException("Error na aplicação por favor contacta a equipe de desenvolvimento.",HttpStatus.BAD_REQUEST)
-   }
+   // }catch(error) {
+   //    throw new HttpException("Error na aplicação por favor contacta a equipe de desenvolvimento.",HttpStatus.BAD_REQUEST)
+   // }
 
    
 

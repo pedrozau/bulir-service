@@ -34,7 +34,7 @@ export class UserDTO {
      @IsNotEmpty()
      @Expose()
      @ApiProperty()
-     password: string 
+     password?: string 
 
      @ApiProperty()
      @Expose()
