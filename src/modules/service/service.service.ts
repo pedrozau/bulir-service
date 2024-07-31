@@ -37,6 +37,9 @@ export class ServiceService {
     const service = await this.getServiceById(serviceId);
     const user = await this.getUserById(userId);
 
+    console.log(service.price)
+    console.log(user.balance)
+
     if (service.price > user.balance) {
       throw new HttpException('Insufficient balance', 400);
     }
@@ -122,7 +125,7 @@ export class ServiceService {
     const service = await this.getServiceById(serviceId);
     const provider = await this.getUserById(service.providerId);
 
-    const updatedClientBalance = client.balance - service.price;
+    const updatedClientBalance = Math.abs(client.balance) -  service.price;
     const updatedProviderBalance = provider.balance + service.price;
 
     await this.prisma.user.update({
