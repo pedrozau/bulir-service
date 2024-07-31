@@ -38,7 +38,16 @@ export class ServiceService {
     const service = await this.getServiceById(serviceId);
     const user = await this.getUserById(userId);
 
-    if (service.price >  Math.abs(user.balance)) {
+      console.log(service.price)
+      console.log(user.balance)
+
+    if (service.price >=  Math.abs(user.balance)) {
+
+      console.log('OK')
+
+       return true
+     
+    }else {
       throw new HttpException('Insufficient balance', 400);
     }
   }
@@ -105,17 +114,7 @@ export class ServiceService {
     }
   }
 
-  // Delete a service
-//   async deleteService(serviceId: string) {
-//     const service = await this.getServiceById(serviceId);
-//    //  try {
-//       return await this.prisma.service.delete({
-//         where: { id: service.id },
-//       });
-//    //  } catch (error) {
-//    //    throw new HttpException('Error deleting service', 400);
-//    //  }
-//   }
+ 
 
 
 
@@ -151,7 +150,9 @@ async deleteService(serviceId: string) {
     const service = await this.getServiceById(serviceId);
     const provider = await this.getUserById(service.providerId);
 
-    const updatedClientBalance = Math.abs(client.balance) -  service.price;
+     await this.checkBalance(serviceId, clientId)
+
+    const updatedClientBalance = service.price - Math.abs(client.balance);
     const updatedProviderBalance = provider.balance + service.price;
 
     await this.prisma.user.update({
