@@ -37,10 +37,7 @@ export class ServiceService {
     const service = await this.getServiceById(serviceId);
     const user = await this.getUserById(userId);
 
-    console.log(service.price)
-    console.log(user.balance)
-
-    if (service.price > user.balance) {
+    if (service.price >  Math.abs(user.balance)) {
       throw new HttpException('Insufficient balance', 400);
     }
   }

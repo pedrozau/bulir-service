@@ -35,6 +35,9 @@ export class TransactionService {
             const {id} = await this.checkUser(userId)
 
             return await this.prisma.transaction.findMany({
+                 include: {
+                    service: true, 
+                 },
                  where: {
                      clientId: id
                  }
