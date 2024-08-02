@@ -167,10 +167,12 @@ async deleteService(serviceId: string) {
 
   // Hire a service
   async serviceHire({ clientId, serviceId }: ServiceHire) {
-    const client = await this.getUserById(clientId);
+     
+      try {
+        const client = await this.getUserById(clientId);
     const service = await this.getServiceById(serviceId);
 
-    const { clientBalance } = await this.calcBalance({ clientId, serviceId });
+    const clientBalance  = await this.calcBalance({ clientId, serviceId });
 
     return await this.prisma.transaction.create({
       data: {
@@ -180,5 +182,10 @@ async deleteService(serviceId: string) {
         amount: service.price,
       },
     });
-  }
+  }catch (error) {
+        throw new HttpException('Error hiring service', 400);
+      }
 }
+}
+
+   
