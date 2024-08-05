@@ -172,7 +172,7 @@ async deleteService(serviceId: string) {
         const client = await this.getUserById(clientId);
     const service = await this.getServiceById(serviceId);
 
-    const clientBalance  = await this.calcBalance({ clientId, serviceId });
+     await this.calcBalance({ clientId, serviceId });
 
     return await this.prisma.transaction.create({
       data: {
