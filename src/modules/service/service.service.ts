@@ -80,7 +80,7 @@ export class ServiceService {
   // Get service by title
   async getServiceByTitle({ title }: ServiceSearch) {
     try {
-      return await this.prisma.service.findFirst({ where: { description: {
+      return await this.prisma.service.findMany({ where: { description: {
               contains: title,
       } } });
     } catch (error) {
