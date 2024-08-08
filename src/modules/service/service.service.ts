@@ -82,6 +82,7 @@ export class ServiceService {
     try {
       return await this.prisma.service.findMany({ where: { title: {
               contains: title,
+              mode: 'insensitive'
       } } });
     } catch (error) {
       throw new HttpException('Application error', 500);
