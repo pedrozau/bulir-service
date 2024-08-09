@@ -44,6 +44,8 @@ export class ServiceController {
    @Post('hire')
    @UseGuards(AuthGuard)
    async hireService(@Body() data: ServiceHire) {
+    console.log(data.clientId)
+    console.log(data.serviceId)   
      return await this.serviceService.serviceHire(data)
    }
 

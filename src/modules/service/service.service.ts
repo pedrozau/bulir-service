@@ -142,112 +142,82 @@ async deleteService(serviceId: string) {
 
   // Calculate balance for client and provider
   async calcBalance({ clientId, serviceId }: ServiceHire) {
-    try {
-        // Utilize uma transação para garantir que todas as operações sejam atômicas
-        const [client, service, provider] = await this.prisma.$transaction([
-            this.prisma.user.findUnique({ where: { id: clientId } }),
-            this.prisma.service.findUnique({ where: { id: serviceId } }),
-            this.prisma.user.findUnique({ where: { id: (await this.prisma.service.findUnique({ where: { id: serviceId } })).providerId } })
-        ]);
 
-        // Verifique se todos os dados necessários foram encontrados
-        if (!client || !service || !provider) {
-            throw new Error('Client, service, or provider not found');
-        }
+    const client = await this.getUserById(clientId);
+    const service = await this.getServiceById(serviceId);
+    const provider = await this.getUserById(service.providerId);
 
-        if (!this.isClient(client.id)) {
-            throw new Error('Invalid client');
-        }
 
-        const updatedClientBalance = client.balance - service.price;
-        const updatedProviderBalance = provider.balance + service.price;
 
-        // Atualize os saldos de cliente e provedor dentro da transação
-        await this.prisma.$transaction([
-            this.prisma.user.update({
-                where: { id: client.id },
-                data: { balance: updatedClientBalance }
-            }),
-            this.prisma.user.update({
-                where: { id: provider.id },
-                data: { balance: updatedProviderBalance }
-            })
-        ]);
 
-        return {
-            clientBalance: updatedClientBalance,
-            providerBalance: updatedProviderBalance
-        };
-    } catch (error) {
-        // Lide com o erro de forma apropriada
-        console.error(error);
-        throw new Error('Failed to calculate balance');
-    }
+
+    
 }
 
 
-  // Hire a service
-//   async serviceHire({ clientId, serviceId }: ServiceHire) {
-     
-//       try {
-//         const client = await this.getUserById(clientId);
-//     const service = await this.getServiceById(serviceId);
-
-//      await this.calcBalance({ clientId, serviceId });
-
-//     return await this.prisma.transaction.create({
-//       data: {
-//         clientId: client.id,
-//         providerId: service.providerId,
-//         serviceId: service.id,
-//         amount: service.price,
-//       },
-//     });
-//   }catch (error) {
-//         throw new HttpException('Error hiring service', 400);
-//       }
-// }
-
+ 
 async serviceHire({ clientId, serviceId }: ServiceHire) {
-  try {
-      // Inicie uma transação para garantir atomicidade
-      const result = await this.prisma.$transaction(async (prisma) => {
-          // Obtenha o cliente e o serviço dentro da transação
-          const [client, service] = await Promise.all([
-              prisma.user.findUnique({ where: { id: clientId } }),
-              prisma.service.findUnique({ where: { id: serviceId } })
-          ]);
+   
+        // Obtenha o cliente e o serviço
+       
+        const client = await this.prisma.user.findFirst({ where: { id: clientId } });
+        const service = await this.getServiceById(serviceId);
+        const provider = await this.getUserById(service.providerId);
+       
 
-          // Verifique se o cliente e o serviço existem
-          if (!client || !service) {
-              throw new HttpException('Client or service not found', 404);
-          }
+      
 
-          // Calcule o saldo e atualize os saldos dos usuários
-          const { clientBalance, providerBalance } = await this.calcBalance({ clientId, serviceId });
-              console.log(clientBalance)
-              console.log(providerBalance)
-          // Crie a transação de serviço
-          const transaction = await prisma.transaction.create({
-              data: {
-                  clientId: client.id,
-                  providerId: service.providerId,
-                  serviceId: service.id,
-                  amount: service.price,
-              },
+       
+
+        if(await this.isClient(clientId) === false) {
+            throw new HttpException('Only clients can hire services', 400);
+
+        }
+
+        
+        if(client.balance < service.price) {
+            throw new HttpException('Insufficient funds', 400);
+
+        }
+
+        // Calcule o saldo do cliente e do prestador
+        const clientBalance = client.balance - service.price;
+        const providerBalance = provider.balance + service.price;
+
+        const transactions = await this.prisma.$transaction(async (tx) => {
+          const clientUpdate = await tx.user.update({
+            where: { id: client.id },
+            data: { balance: clientBalance },
+            select: {
+              password:false,
+              id:true,
+              balance:true,
+              role:true,
+
+            },
           });
 
-          // Retorne a transação criada
-          return transaction;
-      });
+          const providerUpdate = await tx.user.update({
+            where: { id: provider.id },
+            data: { balance: providerBalance },
+          });
 
-      return result;
-  } catch (error) {
-      // Lide com o erro de forma apropriada e forneça uma mensagem detalhada
-      console.error(error);
-      throw new HttpException('Failed to hire service. Please try again later.', 500);
-  }
+          const hire = await tx.transaction.create({
+            data: {
+              clientId: client.id,
+              providerId: provider.id,
+              serviceId: service.id,
+              amount: service.price,
+            },
+          });
+
+          return { clientUpdate, providerUpdate, hire };
+        });
+
+        return transactions;
+   
 }
+
 
 
 
